@@ -137,7 +137,3 @@ in the working directory (or update the filename in the source code).
 | `scores.txt` | Scoreboard file generated at runtime |
 
 ---
-
-## License
-(Add a license here if required.)
-
