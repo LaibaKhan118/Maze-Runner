@@ -136,4 +136,3 @@ in the working directory (or update the filename in the source code).
 | `maze-runner.cpp` | Full game source including all DS implementations |
 | `scores.txt` | Scoreboard file generated at runtime |
 
----
