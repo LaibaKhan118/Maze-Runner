@@ -1,4 +1,3 @@
-// maze_runner_micestyle_shapes_final_ui_improved.cpp
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "raylib.h"
@@ -16,7 +15,7 @@
 #include <chrono>
 using namespace std;
 
-/* ---------- Constants & Enums ---------- */
+// ---------- Constants & Enums ---------- //
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 700;
 const int FPS = 60;
@@ -26,7 +25,7 @@ enum MazeSize { SIZE_SMALL = 20, SIZE_MEDIUM = 30, SIZE_LARGE = 40 };
 enum GameState { STATE_HOME, STATE_PLAYER_NAME, STATE_SIZE_SELECT, STATE_DIFFICULTY_SELECT, STATE_COUNTDOWN, STATE_PLAYING, STATE_END, STATE_SCOREBOARD, STATE_REPLAY };
 enum DifficultyLevel { DIFF_EASY, DIFF_MEDIUM, DIFF_HARD };
 
-/* ---------- Colors (custom) ---------- */
+// ---------- Colors (custom) ---------- //
 const Color DARKRED = Color{ 139, 0,   0,   255 };
 const Color DARKORANGE = Color{ 200, 100, 0,   255 };
 const Color LIGHTBLUE = Color{ 173, 216, 230, 255 };
@@ -34,16 +33,16 @@ const Color PANEL_GRAY = Color{ 240, 240, 245, 255 };
 const Color MY_ORANGE = Color{ 255, 165, 0,   255 };
 const Color GREENDARK = Color{ 0,   100, 0,   255 };
 const Color BLUEDARK = Color{ 0,   0,   139, 255 };
-const Color UI_BLUE = Color{ 52, 110, 255, 255 }; // nicer panel blue
+const Color UI_BLUE = Color{ 52, 110, 255, 255 }; 
 
-/* ---------- RNG ---------- */
+// ---------- RNG ---------- //
 static std::mt19937 rng((unsigned)chrono::system_clock::now().time_since_epoch().count());
 int irand(int a, int b) { return std::uniform_int_distribution<int>(a, b)(rng); }
 
-/* --------- Music ------------- */
+// --------- Music ------------- //
 Music backgroundMusic;
 
-/* ---------- Data structures ---------- */
+// ---------- Data structures ---------- //
 
 // PlayerMove for replay
 struct PlayerMove { int x, y; float t; PlayerMove(int X = 0, int Y = 0, float T = 0) : x(X), y(Y), t(T) {} };
@@ -66,7 +65,7 @@ public:
     int getSize() const { return sz; }
     void clear() { LinkedListNode* p = head; while (p) { LinkedListNode* t = p; p = p->next; delete t; } head = tail = nullptr; sz = 0; }
 };
-/* ---------- Stack (LIFO) ---------- */
+
 template <typename T>
 class Stack {
     struct Node {
@@ -86,7 +85,6 @@ public:
     }
 
     T& top() {
-        // assume non-empty where used (as in your code)
         return head->data;
     }
 
@@ -106,7 +104,6 @@ public:
     }
 };
 
-/* ---------- Queue (FIFO) ---------- */
 template <typename T>
 class Queue {
     struct Node {
@@ -134,7 +131,6 @@ public:
     }
 
     T& front() {
-        // assume non-empty where used
         return frontNode->data;
     }
 
@@ -207,7 +203,7 @@ public:
     void clear() { destroy(root); root = nullptr; }
 };
 
-/* ---------- Visit table ---------- */
+// ---------- Visit table ---------- //
 class VisitHashTable {
     static const int SIZE = 1031;
     struct Node { int x, y; Node* next; Node(int X, int Y) : x(X), y(Y), next(nullptr) {} };
@@ -231,12 +227,12 @@ public:
     }
 };
 
-/* ---------- Cell ---------- */
+// ---------- Cell ---------- //
 struct Cell {
     int x = 0, y = 0;
     bool walls[4];
-    bool isPath;        // carved path / walkable
-    bool isReplay;      // highlighted during replay (both modes)
+    bool isPath;       
+    bool isReplay;      
     Cell() : x(0), y(0), isPath(false), isReplay(false) {
         walls[0] = walls[1] = walls[2] = walls[3] = true;
     }
@@ -248,14 +244,14 @@ struct Coord {
     int x, y;
 };
 
-/* ---------- Button ---------- */
+// ---------- Button ---------- //
 struct Button {
     Rectangle rect;
     string text;
     Color color, hoverColor;
     bool hovered;
 
-    // default ctor (fixes no-default-constructor error)
+    
     Button() : rect({ 0,0,0,0 }), text(""), color(LIGHTGRAY), hoverColor(GRAY), hovered(false) {}
     Button(float x, float y, float w, float h, const string& t, Color c = LIGHTGRAY, Color hc = GRAY)
         : rect({ x,y,w,h }), text(t), color(c), hoverColor(hc), hovered(false) {
@@ -264,7 +260,7 @@ struct Button {
     void draw() {
         DrawRectangleRec(rect, hovered ? hoverColor : color);
         DrawRectangleLinesEx(rect, 2, BLACK);
-        int fs = 22; // larger button font for better UI
+        int fs = 22; 
         int tw = MeasureText(text.c_str(), fs);
         DrawText(text.c_str(), static_cast<int>(rect.x + (rect.width - tw) / 2.0f), static_cast<int>(rect.y + (rect.height - fs) / 2.0f), fs, WHITE);
     }
@@ -272,7 +268,7 @@ struct Button {
     bool clicked(Vector2 m) { return hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON); }
 };
 
-/* ---------- Globals ---------- */
+// ---------- Globals ---------- //
 GameState currentState = STATE_HOME;
 DifficultyLevel currentDifficulty = DIFF_EASY;
 int mazeRows = SIZE_SMALL, mazeCols = SIZE_SMALL;
@@ -300,12 +296,10 @@ vector<Coord> replayPath; int replayIndex = 0; float replayTimer = 0.0f;
 float replayDisplayTime = 0.0f;
 int   replayDisplayMoves = 0;
 bool  replayDisplayHasTime = false;
-Color pathColor = Color{ 200,200,210,220 }; Color playerColor = Color{ 255,100,0,200 }; // path lighter, player as before
-
-// true when current replay session is revealing the optimal path (so HUD text can reflect)
+Color pathColor = Color{ 200,200,210,220 }; Color playerColor = Color{ 255,100,0,200 }; 
 bool replaySessionIsSolution = false;
 
-/* ---------- Utilities ---------- */
+// ---------- Utilities ---------- //
 string CurrentDateTime() {
     time_t now = time(nullptr);
 #if defined(_MSC_VER)
@@ -317,7 +311,6 @@ string CurrentDateTime() {
 #endif
 }
 
-// centered text + shadow for nicer menus
 void DrawTextShadow(const char* text, int x, int y, int fontSize, Color color) {
     DrawText(text, x + 2, y + 2, fontSize, Fade(BLACK, 0.35f)); // subtle shadow
     DrawText(text, x, y, fontSize, color);
@@ -327,7 +320,7 @@ void DrawCenteredTextShadow(const char* text, int centerX, int y, int fontSize, 
     DrawTextShadow(text, centerX - tw / 2, y, fontSize, color);
 }
 
-/* ---------- Maze generation (iterative DFS) ---------- */
+// ---------- Maze generation (iterative DFS) ---------- //
 void initMazeGrid(int rows, int cols) {
     maze.clear();
     maze.resize(rows, vector<Cell>(cols));
@@ -374,7 +367,7 @@ void generateFullMaze(int rows, int cols) {
     maze[rows - 1][cols - 1].isPath = true;
 }
 
-/* ---------- BFS solver ---------- */
+// ---------- BFS solver ---------- //
 vector<Cell*> BFSSolve() {
     vector<Cell*> path;
     if (mazeRows <= 0 || mazeCols <= 0) return path;
@@ -402,7 +395,7 @@ vector<Cell*> BFSSolve() {
     return path;
 }
 
-/* ---------- Score file I/O ---------- */
+// ---------- Score file I/O ---------- //
 void SaveScoreToFile(const PlayerScore& p) {
     ofstream f("scores.txt", ios::app);
     if (!f.is_open()) return;
@@ -432,7 +425,7 @@ void LoadScoresFromFile() {
     f.close();
 }
 
-/* ---------- UI Initialization ---------- */
+// ---------- UI Initialization ---------- //
 void InitUI() {
     homeButtons.clear();
     homeButtons.push_back(Button(350, 200, 300, 60, "START GAME", UI_BLUE, BLUEDARK));
@@ -449,7 +442,7 @@ void InitUI() {
     diffButtons.push_back(Button(350, 280, 300, 60, "MEDIUM", MY_ORANGE, DARKORANGE));
     diffButtons.push_back(Button(350, 360, 300, 60, "HARD", DARKRED, Color{ 160,20,20,255 }));
 
-    // center end buttons and space them nicely lower on screen
+    
     endButtons.clear();
     int cx = (SCREEN_WIDTH - UI_PANEL_WIDTH) / 2;
     int cy = SCREEN_HEIGHT / 3;
@@ -457,7 +450,7 @@ void InitUI() {
     endButtons.push_back(Button(static_cast<float>(cx) - 150.0f, static_cast<float>(cy) + 280.0f, 300, 60, "SELECT ANOTHER", Color{ 40,200,120,255 }, GREENDARK));
     endButtons.push_back(Button(static_cast<float>(cx) - 150.0f, static_cast<float>(cy) + 340.0f, 300, 60, "RETURN HOME", DARKRED, Color{ 160,20,20,255 }));
     
-    // place music toggle inside the right HUD (so it doesn't collide with title)
+   
     musicBtn = Button(static_cast<float>(SCREEN_WIDTH - UI_PANEL_WIDTH) + 12.0f, 12.0f, 36, 36, "M", Color{ 220,220,220,255 }, Color{ 200,200,200,255 });
     pauseBtn = Button(static_cast<float>(SCREEN_WIDTH - 150), 12.0f, 36, 36, "||");
   
@@ -465,22 +458,19 @@ void InitUI() {
     endButtonsCreated = true;
 }
 
-/* ---------- Drawing helpers for Mice-Maze style tiles ---------- */
+// ---------- Drawing helpers for Maze style tiles ---------- //
 
-// Draw a beveled glossy green strip/rectangle used for walls (we will draw them along edges)
 void DrawGreenWall(float x, float y, float w, float h) {
     DrawRectangle(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h), Color{ 14,160,0,255 });
     DrawRectangle(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h * 0.45f), Color{ 100,220,100,255 });
     DrawRectangleLines(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h), Color{ 20,90,10,255 });
 }
 
-// Draw a subtle floor tile for carved path
 void DrawFloorTile(float x, float y, float w, float h) {
     DrawRectangle(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h), Fade(LIGHTGRAY, 0.08f));
     DrawRectangleLines(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h), Fade(BLACK, 0.06f));
 }
 
-// Draw small stylized cheese (circle with holes)
 void DrawCheeseIcon(float cx, float cy, float r) {
     DrawCircle(static_cast<int>(cx), static_cast<int>(cy), static_cast<int>(r), YELLOW);
     DrawCircle(static_cast<int>(cx - r / 3.0f), static_cast<int>(cy - r / 4.0f), static_cast<int>(r * 0.18f), Color{ 200,160,0,255 });
@@ -488,14 +478,13 @@ void DrawCheeseIcon(float cx, float cy, float r) {
     DrawCircle(static_cast<int>(cx + r / 4.0f), static_cast<int>(cy - r / 6.0f), static_cast<int>(r * 0.12f), Color{ 200,160,0,255 });
 }
 
-// Draw bomb icon (simple)
 void DrawBombIcon(float cx, float cy, float r) {
     DrawCircle(static_cast<int>(cx), static_cast<int>(cy), static_cast<int>(r), DARKGRAY);
     DrawCircleLines(static_cast<int>(cx), static_cast<int>(cy), static_cast<int>(r), BLACK);
     DrawLine(static_cast<int>(cx - r * 0.6f), static_cast<int>(cy - r), static_cast<int>(cx - r * 0.2f), static_cast<int>(cy - r * 0.8f), BLACK);
 }
 
-// Draw a simple enemy face (a colored mask)
+
 void DrawEnemyIcon(float cx, float cy, float r, Color c) {
     DrawCircle(static_cast<int>(cx), static_cast<int>(cy), static_cast<int>(r), c);
     DrawCircle(static_cast<int>(cx - r / 3.5f), static_cast<int>(cy - r / 6.0f), static_cast<int>(r * 0.18f), WHITE);
@@ -503,13 +492,12 @@ void DrawEnemyIcon(float cx, float cy, float r, Color c) {
     DrawCircle(static_cast<int>(cx), static_cast<int>(cy + r / 4.0f), static_cast<int>(r * 0.12f), BLACK);
 }
 
-// Draw mouse/player
 void DrawPlayerIcon(float cx, float cy, float r) {
     DrawCircle(static_cast<int>(cx), static_cast<int>(cy), static_cast<int>(r), playerColor);
     DrawCircle(static_cast<int>(cx - r / 2.5f), static_cast<int>(cy - r / 2.5f), static_cast<int>(r * 0.4f), WHITE); // ear highlight
 }
 
-/* ---------- Draw Maze in Mice-Maze look (walls as green strips) ---------- */
+// ---------- Draw Maze in Mice-Maze look (walls as green strips) ---------- //
 void DrawMaze() {
     if (mazeRows <= 0 || mazeCols <= 0) return;
     int mazeWidth = SCREEN_WIDTH - UI_PANEL_WIDTH;
@@ -520,7 +508,7 @@ void DrawMaze() {
     // background frame
     DrawRectangle(static_cast<int>(startX) - 2, static_cast<int>(startY) - 2, static_cast<int>(mazeCols * cellSize + 4.0f), static_cast<int>(mazeRows * cellSize + 4.0f), BLACK);
 
-    // draw floors for carved path cells and dark tiles for walls
+    // floors for carved path cells and dark tiles for walls
     for (int y = 0; y < mazeRows; ++y) {
         for (int x = 0; x < mazeCols; ++x) {
             float cx = startX + x * cellSize;
@@ -532,7 +520,6 @@ void DrawMaze() {
                 float pad = cellSize * 0.06f;
 
                 if (maze[y][x].isReplay) {
-                    // golden / honey highlight
                     DrawRectangle((int)(cx + pad), (int)(cy + pad),
                         (int)(cellSize - 2 * pad), (int)(cellSize - 2 * pad),
                         Color{ 255, 215, 0, 220 }); // gold
@@ -551,7 +538,7 @@ void DrawMaze() {
         }
     }
 
-    // draw walls as green strips on edges
+    // walls as green strips on edges
     float wallThickness = max(2.0f, cellSize * 0.16f);
     for (int y = 0; y < mazeRows; ++y) {
         for (int x = 0; x < mazeCols; ++x) {
@@ -571,7 +558,7 @@ void DrawMaze() {
     DrawCircle(static_cast<int>(ex), static_cast<int>(ey), static_cast<int>(cellSize * 0.33f), RED);
 }
 
-/* ---------- Draw elements like cheese/enemy on random cells ---------- */
+
 void DrawDecorations() {
     if (mazeRows <= 0 || mazeCols <= 0) return;
     int mazeWidth = SCREEN_WIDTH - UI_PANEL_WIDTH;
@@ -598,7 +585,7 @@ void DrawDecorations() {
     }
 }
 
-/* ---------- Draw player ---------- */
+// ---------- Draw player ---------- //
 void DrawPlayer() {
     if (cellSize <= 0) return;
     int mazeWidth = SCREEN_WIDTH - UI_PANEL_WIDTH;
@@ -609,21 +596,18 @@ void DrawPlayer() {
     DrawPlayerIcon(px, py, cellSize * 0.28f);
 }
 
-/* ---------- Draw HUD (right panel) ---------- */
+// the right panel
 void DrawHUD() {
     int panelX = SCREEN_WIDTH - UI_PANEL_WIDTH;
     DrawRectangle(panelX, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, UI_BLUE);
-    // Disable music button in replay
     if (currentState != STATE_REPLAY) {
         Vector2 m = GetMousePosition();
         musicBtn.checkHover(m);
         musicBtn.draw();
         DrawText(musicEnabled ? "ON" : "OFF", panelX + 60, 20, 14, WHITE);
     }
-    
-    // Stats - larger and spaced for clarity
+ 
     if (currentState == STATE_REPLAY) {
-        // use replayDisplay* instead of live game values
         if (replayDisplayHasTime)
             DrawText(TextFormat("TIME: %.2fs", replayDisplayTime), panelX + 20, 90, 18, WHITE);
         else
@@ -635,6 +619,7 @@ void DrawHUD() {
         DrawText(TextFormat("TIME: %.2fs", gameTimer), panelX + 20, 90, 18, WHITE);
         DrawText(TextFormat("MOVES: %d", movesCount), panelX + 20, 120, 16, WHITE);
     }
+    
     // Difficulty bar
     DrawText("DIFFICULTY", panelX + 20, 190, 14, WHITE);
     DrawRectangle(panelX + 20, 215, 200, 18, Fade(WHITE, 0.12f));
@@ -643,18 +628,16 @@ void DrawHUD() {
     Color col;
     if (currentDifficulty == DIFF_EASY) col = GREEN;
     else if (currentDifficulty == DIFF_MEDIUM) col = MY_ORANGE;
-    else col = RED;  // DIFFHARD
+    else col = RED;  
 
     DrawRectangle(panelX + 20, 215, static_cast<int>(fill), 18, col);
     DrawRectangleLines(panelX + 20, 215, 200, 18, BLACK);
-
-    // Controls legend
     DrawText("Controls:", panelX + 20, 260, 14, WHITE);
     DrawText("Arrow keys - move", panelX + 20, 285, 12, WHITE);
     DrawText("Q - back to home", panelX + 20, 315, 12, WHITE);  
 }
 
-/* ---------- Update hover ---------- */
+// ---------- Update hover ---------- //
 void UpdateHoversMain() {
     Vector2 m = GetMousePosition();
     if (currentState == STATE_HOME) { for (auto& b : homeButtons) b.checkHover(m); musicBtn.checkHover(m); }
@@ -666,7 +649,7 @@ void UpdateHoversMain() {
     else if (currentState == STATE_PLAYING) pauseBtn.checkHover(m);
 }
 
-/* ---------- End comparison / replay ---------- */
+// ---------- End comparison / replay ---------- //
 void ShowEndComparison() {
     bool perfect = false;
     if (playerPath.getSize() == static_cast<int>(solutionPath.size())) {
@@ -691,7 +674,7 @@ void ShowEndComparison() {
         DrawCenteredTextShadow("GOOD EFFORT!", cx, cy, 40, MY_ORANGE);
         DrawCenteredTextShadow("View optimal path or replay your path", cx, cy + 56, 20, DARKORANGE);
 
-        // OPTIMAL / REPLAY buttons (above the final action buttons)
+        // OPTIMAL / REPLAY buttons 
         Button opt(static_cast<float>(cx) - 150.0f, static_cast<float>(cy) + 100.0f, 300, 60, "OPTIMAL PATH", Color{ 70,130,255,255 }, BLUEDARK);
         Button rep(static_cast<float>(cx) - 150.0f, static_cast<float>(cy) + 160.0f, 300, 60, "REPLAY MY PATH", Color{ 40,200,120,255 }, GREENDARK);
         Vector2 m = GetMousePosition();
@@ -733,10 +716,9 @@ void ShowEndComparison() {
     }
 }
 
-/* ---------- Forward declaration for evaluateDifficulty (used earlier) ---------- */
 float evaluateDifficulty(int rows, int cols);
 
-/* ---------- Reset and start ---------- */
+// ---------- Reset and start ---------- //
 void ResetGameWithCurrentMaze() {
     if (generatedMazes.empty()) {
         generateFullMaze(mazeRows, mazeCols);
@@ -749,13 +731,11 @@ void ResetGameWithCurrentMaze() {
         solutionPath.push_back({ c->x, c->y });
     }
 
-
-    // mark carved path visually based on maze.isPath
     replayPath.clear(); replayIndex = 0; replayTimer = 0.0f;
     gameCompleted = false;
 }
 
-/* ---------- Evaluate difficulty quick helper ---------- */
+// ---------- Evaluate difficulty quick helper ---------- //
 float evaluateDifficulty(int rows, int cols) {
     if (maze.empty()) return 0.0f;
     int R = rows, C = cols;
@@ -774,7 +754,7 @@ float evaluateDifficulty(int rows, int cols) {
     return score;
 }
 
-/* ---------- Multi-maze generate & pick (simple) ---------- */
+// ---------- Multi-maze generate & pick (simple) ---------- //
 void GenerateMultipleMazesAndPick() {
     generatedMazes.clear();
     const int N = 6;
@@ -820,7 +800,7 @@ void GenerateMultipleMazesAndPick() {
     if (!found) currentMazeScore = evaluateDifficulty(mazeRows, mazeCols);
 }
 
-/* ---------- Main ---------- */
+
 int main() {
     rng.seed((unsigned)chrono::system_clock::now().time_since_epoch().count());
 
@@ -831,7 +811,7 @@ int main() {
     generateFullMaze(mazeRows, mazeCols);
     solutionPath.clear();
     for (auto* c : BFSSolve()) {
-        solutionPath.push_back({ c->x, c->y });  // Coord struct with x, y
+        solutionPath.push_back({ c->x, c->y });  
     }
     playerPath.clear(); playerPath.add(PlayerMove(0, 0, 0.0f));
 
@@ -846,7 +826,7 @@ int main() {
 
     while (!WindowShouldClose() && !shouldClose) {
         float dt = GetFrameTime();
-        UpdateHoversMain();  // Handle hover state for buttons, etc.
+        UpdateHoversMain(); 
         if (currentState == STATE_PLAYING && musicEnabled) {
             if (!musicPlaying) {
                 PlayMusicStream(backgroundMusic);
@@ -855,12 +835,10 @@ int main() {
             UpdateMusicStream(backgroundMusic);
         }
 
-        // If not in playing state, music stops (but NOT unloaded)
         if (currentState != STATE_PLAYING && musicPlaying) {
             StopMusicStream(backgroundMusic);
             musicPlaying = false;
         }
-        // Handle different game states (e.g., home screen, size select, etc.)
         switch (currentState) {
         case STATE_HOME: {
             Vector2 m = GetMousePosition();
@@ -869,7 +847,7 @@ int main() {
             if (homeButtons[2].clicked(m)) { shouldClose = true; }
             if (homeButtons[0].clicked(m)) {
                 playerInput.clear();
-                currentState = STATE_PLAYER_NAME;  // Go to name screen first
+                currentState = STATE_PLAYER_NAME;  
             }
             break;
         }
@@ -885,7 +863,6 @@ int main() {
             if (IsKeyPressed(KEY_Q)) {
                 currentState = STATE_HOME;
             }
-            // Handle text input
             int key = GetCharPressed();
             while (key > 0) {
                 if ((key >= 32 && key <= 125) && playerInput.length() < 12) {
@@ -900,7 +877,7 @@ int main() {
             if (sizeButtons[0].clicked(m)) { mazeRows = mazeCols = SIZE_SMALL; currentState = STATE_DIFFICULTY_SELECT; }
             if (sizeButtons[1].clicked(m)) { mazeRows = mazeCols = SIZE_MEDIUM; currentState = STATE_DIFFICULTY_SELECT; }
             if (sizeButtons[2].clicked(m)) { mazeRows = mazeCols = SIZE_LARGE; currentState = STATE_DIFFICULTY_SELECT; }
-            if (IsKeyPressed(KEY_Q)) currentState = STATE_HOME;  // ADD THIS
+            if (IsKeyPressed(KEY_Q)) currentState = STATE_HOME;  
             break;
         }
         case STATE_DIFFICULTY_SELECT: {
@@ -908,7 +885,7 @@ int main() {
             if (diffButtons[0].clicked(m)) { currentDifficulty = DIFF_EASY; GenerateMultipleMazesAndPick(); currentState = STATE_COUNTDOWN; countdownTimer = 3.0f; }
             if (diffButtons[1].clicked(m)) { currentDifficulty = DIFF_MEDIUM; GenerateMultipleMazesAndPick(); currentState = STATE_COUNTDOWN; countdownTimer = 3.0f; }
             if (diffButtons[2].clicked(m)) { currentDifficulty = DIFF_HARD; GenerateMultipleMazesAndPick(); currentState = STATE_COUNTDOWN; countdownTimer = 3.0f; }
-            if (IsKeyPressed(KEY_Q)) currentState = STATE_SIZE_SELECT;  // ADD THIS
+            if (IsKeyPressed(KEY_Q)) currentState = STATE_SIZE_SELECT; 
             break;
         }
         case STATE_COUNTDOWN: {
@@ -939,32 +916,32 @@ int main() {
             if (pauseBtn.clicked(m)) {
                 gamePaused = !gamePaused;
                 if (gamePaused) {
-                    PauseMusicStream(backgroundMusic);  // Pause music when game is paused
+                    PauseMusicStream(backgroundMusic);  
                 }
                 else {
-                    ResumeMusicStream(backgroundMusic); // Resume music when game is playing
+                    ResumeMusicStream(backgroundMusic);
                 }
             }
 
-            // Toggle music on/off when the button is clicked
+        
             if (musicBtn.clicked(m)) {
                 musicEnabled = !musicEnabled;
                 if (musicEnabled) {
-                    PlayMusicStream(backgroundMusic);  // Start playing the music
+                    PlayMusicStream(backgroundMusic);  
                 }
                 else {
-                    StopMusicStream(backgroundMusic);  // Stop the music
+                    StopMusicStream(backgroundMusic);  
                 }
             }
             
             if (IsKeyPressed(KEY_Q)) {
-                currentState = STATE_HOME;  // Direct to home, no STATEEND
-                gameCompleted = false;     // ADD THIS
+                currentState = STATE_HOME;  
+                gameCompleted = false;    
             }
             break;
         }
         case STATE_END: {
-            StopMusicStream(backgroundMusic);  // Stop music when game ends
+            StopMusicStream(backgroundMusic);  
             Vector2 m = GetMousePosition();
             if (endButtons[0].clicked(m)) { ResetGameWithCurrentMaze(); countdownTimer = 3.0f; currentState = STATE_COUNTDOWN; }
             else if (endButtons[1].clicked(m)) { currentState = STATE_SIZE_SELECT; }
@@ -981,19 +958,18 @@ int main() {
             if (replayTimer >= 0.12f &&
                 replayIndex < (int)replayPath.size()) {
 
-                // Only clear replay flags, keep isPath (geometry) intact
                 for (auto& row : maze)
                     for (auto& c : row)
                         c.isReplay = false;
 
                 const Coord pos = replayPath[replayIndex];
-                maze[pos.y][pos.x].isReplay = true;   // highlight this step
+                maze[pos.y][pos.x].isReplay = true;   
                 replayIndex++;
                 replayTimer = 0.0f;
             }
 
             if (replaySessionIsSolution) {
-                replayDisplayMoves = (int)solutionPath.size() - 1; // moves = edges
+                replayDisplayMoves = (int)solutionPath.size() - 1; 
                 replayDisplayHasTime = false;
             }
             else {
@@ -1002,34 +978,26 @@ int main() {
                 replayDisplayHasTime = true;
             }
 
-            // When finished, leave the final replay highlight as is and wait for Q
             if (IsKeyPressed(KEY_Q)) {
-                // clear replay flags
                 for (auto& row : maze)
                     for (auto& c : row)
                         c.isReplay = false;
-
-                // go back to end screen
                 currentState = STATE_END;
             }
             break;
         }
 
         }
-
-        // Rendering code
+        
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
         if (currentState == STATE_HOME) {
-            // Draw main maze area background
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); // dark background
-
-            // move title a little upward and use bright color so it never clashes with left elements
+            // main maze area background
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
             DrawCenteredTextShadow("MAZE RUNNER - MICE STYLE", (SCREEN_WIDTH) / 2, 60, 32, WHITE);
             DrawCenteredTextShadow("A clean & stylish maze experience", (SCREEN_WIDTH) / 2, 100, 16, Color{ 200,200,255,200 });
             for (auto& b : homeButtons) b.draw();
-            // show small hint in bottom-left (not to collide with title)
             DrawText("Instructions: Use arrow keys to move", 24, SCREEN_HEIGHT - 40, 14, Color{ 200,200,200,220 });
         }
         else if (currentState == STATE_PLAYER_NAME) {
@@ -1044,20 +1012,20 @@ int main() {
         }
 
         else if (currentState == STATE_SIZE_SELECT) {
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); // dark background
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
             DrawCenteredTextShadow("SELECT SIZE", (SCREEN_WIDTH) / 2, 60, 32, WHITE);
             for (auto& b : sizeButtons) b.draw();
             DrawText("Q: Back to Home", 24, SCREEN_HEIGHT - 40, 14, Color{ 200,200,200,220 });
         }
         else if (currentState == STATE_DIFFICULTY_SELECT) {
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); // dark background
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
             DrawCenteredTextShadow("SELECT DIFFICULTY", (SCREEN_WIDTH) / 2, 60, 28, WHITE);
             for (auto& b : diffButtons) b.draw();
             DrawText("Q: Back to Home", 24, SCREEN_HEIGHT - 40, 14, Color{ 200,200,200,220 });
         }
         else if (currentState == STATE_COUNTDOWN) {
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); // dark background
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, UI_BLUE); // panel behind HUD (fallback)
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, UI_BLUE); 
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, UI_BLUE);
             DrawMaze();
             DrawPlayer();
@@ -1067,8 +1035,8 @@ int main() {
             else DrawCenteredTextShadow("GO!", (SCREEN_WIDTH - UI_PANEL_WIDTH) / 2, SCREEN_HEIGHT / 2 - 40, 120, Color{ 120,255,120,255 });
         }
         else if (currentState == STATE_PLAYING) {
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); // dark background
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); // panel behind HUD (fallback)
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); 
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, GRAY);
             DrawMaze();
             DrawDecorations();
@@ -1080,15 +1048,14 @@ int main() {
         }
         else if (currentState == STATE_END) {
             UpdateHoversMain();
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); // dark background
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); // panel behind HUD (fallback)
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); 
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, GRAY);
             DrawMaze();
             DrawDecorations();
             DrawPlayer();
             DrawHUD();
             ShowEndComparison();
-            // draw end buttons (centered)
             if (!endButtons.empty())
                 for (auto& b : endButtons)
                     b.draw();
@@ -1119,12 +1086,12 @@ int main() {
             }
         }
         else if (currentState == STATE_REPLAY) {
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); // dark background
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); // panel behind HUD (fallback)
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); 
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, GRAY);
             DrawMaze();
             DrawDecorations();
-            DrawPlayer();  // Show player at final position
+            DrawPlayer();  // player at final position
             DrawHUD();
             if (replaySessionIsSolution)
                 DrawCenteredTextShadow("OPTIMAL PATH (REVEAL)", (SCREEN_WIDTH - UI_PANEL_WIDTH) / 2, 30, 22, BLUEDARK);
@@ -1143,3 +1110,4 @@ int main() {
     return 0;
 
 }
+
