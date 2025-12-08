@@ -33,7 +33,7 @@ const Color PANEL_GRAY = Color{ 240, 240, 245, 255 };
 const Color MY_ORANGE = Color{ 255, 165, 0,   255 };
 const Color GREENDARK = Color{ 0,   100, 0,   255 };
 const Color BLUEDARK = Color{ 0,   0,   139, 255 };
-const Color UI_BLUE = Color{ 52, 110, 255, 255 }; 
+const Color UI_BLUE = Color{ 52, 110, 255, 255 };
 
 // ---------- RNG ---------- //
 static std::mt19937 rng((unsigned)chrono::system_clock::now().time_since_epoch().count());
@@ -231,8 +231,8 @@ public:
 struct Cell {
     int x = 0, y = 0;
     bool walls[4];
-    bool isPath;       
-    bool isReplay;      
+    bool isPath;
+    bool isReplay;
     Cell() : x(0), y(0), isPath(false), isReplay(false) {
         walls[0] = walls[1] = walls[2] = walls[3] = true;
     }
@@ -251,7 +251,7 @@ struct Button {
     Color color, hoverColor;
     bool hovered;
 
-    
+
     Button() : rect({ 0,0,0,0 }), text(""), color(LIGHTGRAY), hoverColor(GRAY), hovered(false) {}
     Button(float x, float y, float w, float h, const string& t, Color c = LIGHTGRAY, Color hc = GRAY)
         : rect({ x,y,w,h }), text(t), color(c), hoverColor(hc), hovered(false) {
@@ -260,7 +260,7 @@ struct Button {
     void draw() {
         DrawRectangleRec(rect, hovered ? hoverColor : color);
         DrawRectangleLinesEx(rect, 2, BLACK);
-        int fs = 22; 
+        int fs = 22;
         int tw = MeasureText(text.c_str(), fs);
         DrawText(text.c_str(), static_cast<int>(rect.x + (rect.width - tw) / 2.0f), static_cast<int>(rect.y + (rect.height - fs) / 2.0f), fs, WHITE);
     }
@@ -296,7 +296,7 @@ vector<Coord> replayPath; int replayIndex = 0; float replayTimer = 0.0f;
 float replayDisplayTime = 0.0f;
 int   replayDisplayMoves = 0;
 bool  replayDisplayHasTime = false;
-Color pathColor = Color{ 200,200,210,220 }; Color playerColor = Color{ 255,100,0,200 }; 
+Color pathColor = Color{ 200,200,210,220 }; Color playerColor = Color{ 255,100,0,200 };
 bool replaySessionIsSolution = false;
 
 // ---------- Utilities ---------- //
@@ -442,18 +442,18 @@ void InitUI() {
     diffButtons.push_back(Button(350, 280, 300, 60, "MEDIUM", MY_ORANGE, DARKORANGE));
     diffButtons.push_back(Button(350, 360, 300, 60, "HARD", DARKRED, Color{ 160,20,20,255 }));
 
-    
+
     endButtons.clear();
     int cx = (SCREEN_WIDTH - UI_PANEL_WIDTH) / 2;
     int cy = SCREEN_HEIGHT / 3;
     endButtons.push_back(Button(static_cast<float>(cx) - 150.0f, static_cast<float>(cy) + 220.0f, 300, 60, "RETRY MAZE", UI_BLUE, BLUEDARK));
     endButtons.push_back(Button(static_cast<float>(cx) - 150.0f, static_cast<float>(cy) + 280.0f, 300, 60, "SELECT ANOTHER", Color{ 40,200,120,255 }, GREENDARK));
     endButtons.push_back(Button(static_cast<float>(cx) - 150.0f, static_cast<float>(cy) + 340.0f, 300, 60, "RETURN HOME", DARKRED, Color{ 160,20,20,255 }));
-    
-   
+
+
     musicBtn = Button(static_cast<float>(SCREEN_WIDTH - UI_PANEL_WIDTH) + 12.0f, 12.0f, 36, 36, "M", Color{ 220,220,220,255 }, Color{ 200,200,200,255 });
     pauseBtn = Button(static_cast<float>(SCREEN_WIDTH - 150), 12.0f, 36, 36, "||");
-  
+
     LoadScoresFromFile();
     endButtonsCreated = true;
 }
@@ -472,10 +472,13 @@ void DrawFloorTile(float x, float y, float w, float h) {
 }
 
 void DrawCheeseIcon(float cx, float cy, float r) {
-    DrawCircle(static_cast<int>(cx), static_cast<int>(cy), static_cast<int>(r), YELLOW);
-    DrawCircle(static_cast<int>(cx - r / 3.0f), static_cast<int>(cy - r / 4.0f), static_cast<int>(r * 0.18f), Color{ 200,160,0,255 });
-    DrawCircle(static_cast<int>(cx + r / 5.0f), static_cast<int>(cy + r / 8.0f), static_cast<int>(r * 0.14f), Color{ 200,160,0,255 });
-    DrawCircle(static_cast<int>(cx + r / 4.0f), static_cast<int>(cy - r / 6.0f), static_cast<int>(r * 0.12f), Color{ 200,160,0,255 });
+    Vector2 p1 = { cx, cy - r };      
+    Vector2 p2 = { cx - r, cy + r };      
+    Vector2 p3 = { cx + r, cy + r };      
+
+    Vector2 verts[3] = { p1, p2, p3 };
+    DrawTriangle(p1, p2, p3, YELLOW);
+    DrawTriangleLines(p1, p2, p3, BLACK);
 }
 
 void DrawBombIcon(float cx, float cy, float r) {
@@ -551,11 +554,11 @@ void DrawMaze() {
         }
     }
 
-    // Start / End markers
-    float sx = startX + cellSize / 2.0f, sy = startY + cellSize / 2.0f;
-    float ex = startX + (mazeCols - 1) * cellSize + cellSize / 2.0f, ey = startY + (mazeRows - 1) * cellSize + cellSize / 2.0f;
-    DrawCircleLines(static_cast<int>(sx), static_cast<int>(sy), static_cast<int>(cellSize * 0.33f), WHITE);
-    DrawCircle(static_cast<int>(ex), static_cast<int>(ey), static_cast<int>(cellSize * 0.33f), RED);
+    //// Start / End markers
+    //float sx = startX + cellSize / 2.0f, sy = startY + cellSize / 2.0f;
+    //float ex = startX + (mazeCols - 1) * cellSize + cellSize / 2.0f, ey = startY + (mazeRows - 1) * cellSize + cellSize / 2.0f;
+    //DrawCircleLines(static_cast<int>(sx), static_cast<int>(sy), static_cast<int>(cellSize * 0.33f), WHITE);
+    //DrawCircle(static_cast<int>(ex), static_cast<int>(ey), static_cast<int>(cellSize * 0.33f), RED);
 }
 
 
@@ -568,18 +571,13 @@ void DrawDecorations() {
     for (int y = 0; y < mazeRows; ++y) {
         for (int x = 0; x < mazeCols; ++x) {
             if (!maze[y][x].isPath) continue;
-            unsigned int v = static_cast<unsigned int>(x * 73856093u ^ y * 19349663u);
-            if ((v % 500) == 0) {
-                float cx = startX + x * cellSize + cellSize / 2.0f, cy = startY + y * cellSize + cellSize / 2.0f;
+
+            float cx = startX + x * cellSize + cellSize / 2.0f;
+            float cy = startY + y * cellSize + cellSize / 2.0f;
+
+            if (x == mazeCols - 1 && y == mazeRows - 1) {
                 DrawCheeseIcon(cx, cy, cellSize * 0.25f);
-            }
-            else if ((v % 230) == 0) {
-                float cx = startX + x * cellSize + cellSize / 2.0f, cy = startY + y * cellSize + cellSize / 2.0f;
-                DrawBombIcon(cx, cy, cellSize * 0.18f);
-            }
-            else if ((v % 811) == 0) {
-                float cx = startX + x * cellSize + cellSize / 2.0f, cy = startY + y * cellSize + cellSize / 2.0f;
-                DrawEnemyIcon(cx, cy, cellSize * 0.22f, PINK);
+                continue;
             }
         }
     }
@@ -591,10 +589,17 @@ void DrawPlayer() {
     int mazeWidth = SCREEN_WIDTH - UI_PANEL_WIDTH;
     float startX = (mazeWidth - mazeCols * cellSize) / 2.0f;
     float startY = (SCREEN_HEIGHT - mazeRows * cellSize) / 2.0f;
+
     float px = startX + playerX * cellSize + cellSize / 2.0f;
     float py = startY + playerY * cellSize + cellSize / 2.0f;
     DrawPlayerIcon(px, py, cellSize * 0.28f);
+
+    float sx = startX + cellSize / 2.0f;
+    float sy = startY + cellSize / 2.0f;
+    DrawCircle(static_cast<int>(sx), static_cast<int>(sy),
+        static_cast<int>(cellSize * 0.18f), RED);
 }
+
 
 // the right panel
 void DrawHUD() {
@@ -606,7 +611,7 @@ void DrawHUD() {
         musicBtn.draw();
         DrawText(musicEnabled ? "ON" : "OFF", panelX + 60, 20, 14, WHITE);
     }
- 
+
     if (currentState == STATE_REPLAY) {
         if (replayDisplayHasTime)
             DrawText(TextFormat("TIME: %.2fs", replayDisplayTime), panelX + 20, 90, 18, WHITE);
@@ -619,7 +624,7 @@ void DrawHUD() {
         DrawText(TextFormat("TIME: %.2fs", gameTimer), panelX + 20, 90, 18, WHITE);
         DrawText(TextFormat("MOVES: %d", movesCount), panelX + 20, 120, 16, WHITE);
     }
-    
+
     // Difficulty bar
     DrawText("DIFFICULTY", panelX + 20, 190, 14, WHITE);
     DrawRectangle(panelX + 20, 215, 200, 18, Fade(WHITE, 0.12f));
@@ -628,13 +633,13 @@ void DrawHUD() {
     Color col;
     if (currentDifficulty == DIFF_EASY) col = GREEN;
     else if (currentDifficulty == DIFF_MEDIUM) col = MY_ORANGE;
-    else col = RED;  
+    else col = RED;
 
     DrawRectangle(panelX + 20, 215, static_cast<int>(fill), 18, col);
     DrawRectangleLines(panelX + 20, 215, 200, 18, BLACK);
     DrawText("Controls:", panelX + 20, 260, 14, WHITE);
     DrawText("Arrow keys - move", panelX + 20, 285, 12, WHITE);
-    DrawText("Q - back to home", panelX + 20, 315, 12, WHITE);  
+    DrawText("Q - back to home", panelX + 20, 315, 12, WHITE);
 }
 
 // ---------- Update hover ---------- //
@@ -668,7 +673,7 @@ void ShowEndComparison() {
     if (perfect) {
         DrawCenteredTextShadow("PERFECT RUN!", cx, cy, 40, Color{ 200,255,200,255 });
         DrawCenteredTextShadow("You found the shortest path!", cx, cy + 56, 22, GREENDARK);
-        
+
     }
     else {
         DrawCenteredTextShadow("GOOD EFFORT!", cx, cy, 40, MY_ORANGE);
@@ -811,7 +816,7 @@ int main() {
     generateFullMaze(mazeRows, mazeCols);
     solutionPath.clear();
     for (auto* c : BFSSolve()) {
-        solutionPath.push_back({ c->x, c->y });  
+        solutionPath.push_back({ c->x, c->y });
     }
     playerPath.clear(); playerPath.add(PlayerMove(0, 0, 0.0f));
 
@@ -826,7 +831,7 @@ int main() {
 
     while (!WindowShouldClose() && !shouldClose) {
         float dt = GetFrameTime();
-        UpdateHoversMain(); 
+        UpdateHoversMain();
         if (currentState == STATE_PLAYING && musicEnabled) {
             if (!musicPlaying) {
                 PlayMusicStream(backgroundMusic);
@@ -847,11 +852,11 @@ int main() {
             if (homeButtons[2].clicked(m)) { shouldClose = true; }
             if (homeButtons[0].clicked(m)) {
                 playerInput.clear();
-                currentState = STATE_PLAYER_NAME;  
+                currentState = STATE_PLAYER_NAME;
             }
             break;
         }
-        case STATE_PLAYER_NAME:{
+        case STATE_PLAYER_NAME: {
             Vector2 m = GetMousePosition();
             if (IsKeyPressed(KEY_ENTER) && !playerInput.empty()) {
                 playerName = playerInput;
@@ -877,7 +882,7 @@ int main() {
             if (sizeButtons[0].clicked(m)) { mazeRows = mazeCols = SIZE_SMALL; currentState = STATE_DIFFICULTY_SELECT; }
             if (sizeButtons[1].clicked(m)) { mazeRows = mazeCols = SIZE_MEDIUM; currentState = STATE_DIFFICULTY_SELECT; }
             if (sizeButtons[2].clicked(m)) { mazeRows = mazeCols = SIZE_LARGE; currentState = STATE_DIFFICULTY_SELECT; }
-            if (IsKeyPressed(KEY_Q)) currentState = STATE_HOME;  
+            if (IsKeyPressed(KEY_Q)) currentState = STATE_HOME;
             break;
         }
         case STATE_DIFFICULTY_SELECT: {
@@ -885,7 +890,7 @@ int main() {
             if (diffButtons[0].clicked(m)) { currentDifficulty = DIFF_EASY; GenerateMultipleMazesAndPick(); currentState = STATE_COUNTDOWN; countdownTimer = 3.0f; }
             if (diffButtons[1].clicked(m)) { currentDifficulty = DIFF_MEDIUM; GenerateMultipleMazesAndPick(); currentState = STATE_COUNTDOWN; countdownTimer = 3.0f; }
             if (diffButtons[2].clicked(m)) { currentDifficulty = DIFF_HARD; GenerateMultipleMazesAndPick(); currentState = STATE_COUNTDOWN; countdownTimer = 3.0f; }
-            if (IsKeyPressed(KEY_Q)) currentState = STATE_SIZE_SELECT; 
+            if (IsKeyPressed(KEY_Q)) currentState = STATE_SIZE_SELECT;
             break;
         }
         case STATE_COUNTDOWN: {
@@ -916,32 +921,32 @@ int main() {
             if (pauseBtn.clicked(m)) {
                 gamePaused = !gamePaused;
                 if (gamePaused) {
-                    PauseMusicStream(backgroundMusic);  
+                    PauseMusicStream(backgroundMusic);
                 }
                 else {
                     ResumeMusicStream(backgroundMusic);
                 }
             }
 
-        
+
             if (musicBtn.clicked(m)) {
                 musicEnabled = !musicEnabled;
                 if (musicEnabled) {
-                    PlayMusicStream(backgroundMusic);  
+                    PlayMusicStream(backgroundMusic);
                 }
                 else {
-                    StopMusicStream(backgroundMusic);  
+                    StopMusicStream(backgroundMusic);
                 }
             }
-            
+
             if (IsKeyPressed(KEY_Q)) {
-                currentState = STATE_HOME;  
-                gameCompleted = false;    
+                currentState = STATE_HOME;
+                gameCompleted = false;
             }
             break;
         }
         case STATE_END: {
-            StopMusicStream(backgroundMusic);  
+            StopMusicStream(backgroundMusic);
             Vector2 m = GetMousePosition();
             if (endButtons[0].clicked(m)) { ResetGameWithCurrentMaze(); countdownTimer = 3.0f; currentState = STATE_COUNTDOWN; }
             else if (endButtons[1].clicked(m)) { currentState = STATE_SIZE_SELECT; }
@@ -963,13 +968,13 @@ int main() {
                         c.isReplay = false;
 
                 const Coord pos = replayPath[replayIndex];
-                maze[pos.y][pos.x].isReplay = true;   
+                maze[pos.y][pos.x].isReplay = true;
                 replayIndex++;
                 replayTimer = 0.0f;
             }
 
             if (replaySessionIsSolution) {
-                replayDisplayMoves = (int)solutionPath.size() - 1; 
+                replayDisplayMoves = (int)solutionPath.size() - 1;
                 replayDisplayHasTime = false;
             }
             else {
@@ -988,13 +993,13 @@ int main() {
         }
 
         }
-        
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
         if (currentState == STATE_HOME) {
             // main maze area background
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 });
             DrawCenteredTextShadow("MAZE RUNNER - MICE STYLE", (SCREEN_WIDTH) / 2, 60, 32, WHITE);
             DrawCenteredTextShadow("A clean & stylish maze experience", (SCREEN_WIDTH) / 2, 100, 16, Color{ 200,200,255,200 });
             for (auto& b : homeButtons) b.draw();
@@ -1012,20 +1017,20 @@ int main() {
         }
 
         else if (currentState == STATE_SIZE_SELECT) {
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 });
             DrawCenteredTextShadow("SELECT SIZE", (SCREEN_WIDTH) / 2, 60, 32, WHITE);
             for (auto& b : sizeButtons) b.draw();
             DrawText("Q: Back to Home", 24, SCREEN_HEIGHT - 40, 14, Color{ 200,200,200,220 });
         }
         else if (currentState == STATE_DIFFICULTY_SELECT) {
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 });
             DrawCenteredTextShadow("SELECT DIFFICULTY", (SCREEN_WIDTH) / 2, 60, 28, WHITE);
             for (auto& b : diffButtons) b.draw();
             DrawText("Q: Back to Home", 24, SCREEN_HEIGHT - 40, 14, Color{ 200,200,200,220 });
         }
         else if (currentState == STATE_COUNTDOWN) {
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, UI_BLUE); 
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 });
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, UI_BLUE);
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, UI_BLUE);
             DrawMaze();
             DrawPlayer();
@@ -1035,8 +1040,8 @@ int main() {
             else DrawCenteredTextShadow("GO!", (SCREEN_WIDTH - UI_PANEL_WIDTH) / 2, SCREEN_HEIGHT / 2 - 40, 120, Color{ 120,255,120,255 });
         }
         else if (currentState == STATE_PLAYING) {
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); 
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 });
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY);
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, GRAY);
             DrawMaze();
             DrawDecorations();
@@ -1048,8 +1053,8 @@ int main() {
         }
         else if (currentState == STATE_END) {
             UpdateHoversMain();
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); 
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 });
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY);
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, GRAY);
             DrawMaze();
             DrawDecorations();
@@ -1086,8 +1091,8 @@ int main() {
             }
         }
         else if (currentState == STATE_REPLAY) {
-            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 }); 
-            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY); 
+            DrawRectangle(0, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, Color{ 18,18,18,255 });
+            DrawRectangle(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, UI_PANEL_WIDTH, SCREEN_HEIGHT, PANEL_GRAY);
             DrawLine(SCREEN_WIDTH - UI_PANEL_WIDTH, 0, SCREEN_WIDTH - UI_PANEL_WIDTH, SCREEN_HEIGHT, GRAY);
             DrawMaze();
             DrawDecorations();
@@ -1110,4 +1115,3 @@ int main() {
     return 0;
 
 }
-
