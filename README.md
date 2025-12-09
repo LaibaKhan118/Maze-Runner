@@ -127,10 +127,7 @@ This project was built for a **Data Structures** course and showcases:
 
 ## Game Preview
 
-```
-<img width="1004" height="712" alt="Game_screen_easy-small" src="https://github.com/user-attachments/assets/2fdc8e36-d4a3-4cfb-ac7c-d279e8e56f86" />
-
-```
+<img width="504" height="356" alt="Game_screen_easy-small" src="https://github.com/user-attachments/assets/8e10da58-e576-4b47-a794-6ef3d1c407d0" />
 
 ***
 
