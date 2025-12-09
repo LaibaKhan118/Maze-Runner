@@ -33,7 +33,7 @@ https://youtu.be/UiZGTIYld1M?si=887pEBkqj-ts2IVh
 ### 2. Clone or Download the Project
 
 ```bash
-git clone <your-repo-url>.git
+git clone https://github.com/LaibaKhan118/Maze-Runner.git
 cd <your-repo-folder>
 ```
 
